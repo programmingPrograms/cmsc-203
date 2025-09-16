@@ -1,0 +1,230 @@
+/*
+ * Class: CMSC203
+ * Instructor: Dr. Grinberg
+ * Description: Starter ESP Game program
+ * Due: 09/15/2025
+ * Platform/compiler: Eclipse
+ * 
+ * I pledge that I have completed the programming assignment independently.
+ * I have not copied the code from a student or any source.
+ * I have not given my code to any student.
+ * Print your Name here: _Kevin Morales-Romero_________
+ */
+
+import java.util.Scanner;
+
+public class ESPGame {
+    public static void main(String[] args) {
+
+        // ---- constants for color names (no arrays, just constants) ----
+        final String C_BLACK = "black";
+        final String C_WHITE = "white";
+        final String C_GRAY = "gray";
+        final String C_SILVER = "silver";
+        final String C_MAROON = "maroon";
+        final String C_RED = "red";
+        final String C_PURPLE = "purple";
+        final String C_FUCHSIA = "fuchsia";
+        final String C_GREEN = "green";
+        final String C_LIME = "lime";
+        final String C_OLIVE = "olive";
+        final String C_YELLOW = "yellow";
+        final String C_NAVY = "navy";
+        final String C_BLUE = "blue";
+        final String C_TEAL = "teal";
+        final String C_AQUA = "aqua";
+
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("Welcome to the ESP Game!");
+
+        String keepPlaying = "Yes";
+        int lastCorrect = 0; // to write to file later
+        boolean playedAtLeastOnce = false;
+
+        while (keepPlaying.equalsIgnoreCase("Yes")) {
+
+            // ---- menu ----
+            System.out.println();
+            System.out.println("Please choose one of the options:");
+            System.out.println("1. Display first 16 colors");
+            System.out.println("2. Display first 10 colors");
+            System.out.println("3. Display first 5 colors");
+            System.out.println("4. Exit");
+            System.out.print("Enter option (1-4): ");
+
+            int option = 0;
+            if (input.hasNextInt()) {
+                option = input.nextInt();
+            } else {
+                System.out.println("Not a number. Please restart and pick 1-4.");
+                break;
+            }
+
+            // fix: handle out of range too
+            if (option < 1 || option > 4) {
+                System.out.println("Invalid choice. Please restart and pick 1-4.");
+                break;
+            }
+
+            if (option == 4) {
+                System.out.println("Exiting game menu.");
+                break;
+            }
+
+            // ask for filename (ex: colors.txt)
+            System.out.print("Enter the filename (e.g., colors.txt): ");
+            String colorFileName = input.next();
+
+            // ---- show the first N colors from the file ----
+            int limit = 0;
+            if (option == 1) {
+                limit = 16;
+                System.out.println("\nThere are sixteen colors from a file:");
+            } else if (option == 2) {
+                limit = 10;
+                System.out.println("\nFirst ten colors from a file:");
+            } else if (option == 3) {
+                limit = 5;
+                System.out.println("\nFirst five colors from a file:");
+            }
+
+            // NOTE: grader should put colors.txt in the project root (same level as src)
+            java.io.File f = new java.io.File(colorFileName);
+            if (!f.exists()) {
+                System.out.println("File not found. Using fallback hardcoded list (WIP).");
+                if (limit >= 1)  System.out.println("1 black");
+                if (limit >= 2)  System.out.println("2 white");
+                if (limit >= 3)  System.out.println("3 gray");
+                if (limit >= 4)  System.out.println("4 silver");
+                if (limit >= 5)  System.out.println("5 maroon");
+                if (limit >= 6)  System.out.println("6 red");
+                if (limit >= 7)  System.out.println("7 purple");
+                if (limit >= 8)  System.out.println("8 fuchsia");
+                if (limit >= 9)  System.out.println("9 green");
+                if (limit >= 10) System.out.println("10 lime");
+                if (limit >= 11) System.out.println("11 olive");
+                if (limit >= 12) System.out.println("12 yellow");
+                if (limit >= 13) System.out.println("13 navy");
+                if (limit >= 14) System.out.println("14 blue");
+                if (limit >= 15) System.out.println("15 teal");
+                if (limit >= 16) System.out.println("16 aqua");
+            } else {
+                try {
+                    java.util.Scanner fileIn = new java.util.Scanner(f);
+                    int idx = 0;
+                    while (fileIn.hasNextLine() && idx < limit) {
+                        String line = fileIn.nextLine();
+                        idx = idx + 1;
+                        System.out.println(idx + " " + line);
+                    }
+                    fileIn.close();
+                } catch (Exception ex) {
+                    System.out.println("Problem reading file (WIP).");
+                }
+            }
+
+            // ---- play exactly 3 rounds ----
+            int correct = 0;
+            for (int round = 1; round <= 3; round++) {
+                System.out.println();
+                System.out.println("Round " + round);
+                System.out.println("I am thinking of a color. It is one of the colors above.");
+                System.out.print("Enter your guess: ");
+
+                String guess = input.next();
+
+                // input validation: must be one of 16 names
+                boolean validGuess =
+                    guess.equalsIgnoreCase(C_BLACK)  || guess.equalsIgnoreCase(C_WHITE)  ||
+                    guess.equalsIgnoreCase(C_GRAY)   || guess.equalsIgnoreCase(C_SILVER) ||
+                    guess.equalsIgnoreCase(C_MAROON) || guess.equalsIgnoreCase(C_RED)    ||
+                    guess.equalsIgnoreCase(C_PURPLE) || guess.equalsIgnoreCase(C_FUCHSIA)||
+                    guess.equalsIgnoreCase(C_GREEN)  || guess.equalsIgnoreCase(C_LIME)   ||
+                    guess.equalsIgnoreCase(C_OLIVE)  || guess.equalsIgnoreCase(C_YELLOW) ||
+                    guess.equalsIgnoreCase(C_NAVY)   || guess.equalsIgnoreCase(C_BLUE)   ||
+                    guess.equalsIgnoreCase(C_TEAL)   || guess.equalsIgnoreCase(C_AQUA);
+
+                if (!validGuess) {
+                    System.out.print("That isn't in the list. Try again: ");
+                    guess = input.next();
+                }
+
+                // random 1..16 → map to a color (ugly if/else, beginner style)
+                int r = 1 + (int)(Math.random() * 16);
+                String computerColor;
+                if (r == 1)      computerColor = C_BLACK;
+                else if (r == 2) computerColor = C_WHITE;
+                else if (r == 3) computerColor = C_GRAY;
+                else if (r == 4) computerColor = C_SILVER;
+                else if (r == 5) computerColor = C_MAROON;
+                else if (r == 6) computerColor = C_RED;
+                else if (r == 7) computerColor = C_PURPLE;
+                else if (r == 8) computerColor = C_FUCHSIA;
+                else if (r == 9) computerColor = C_GREEN;
+                else if (r == 10) computerColor = C_LIME;
+                else if (r == 11) computerColor = C_OLIVE;
+                else if (r == 12) computerColor = C_YELLOW;
+                else if (r == 13) computerColor = C_NAVY;
+                else if (r == 14) computerColor = C_BLUE;
+                else if (r == 15) computerColor = C_TEAL;
+                else              computerColor = C_AQUA;
+
+                System.out.println("I was thinking of " + computerColor + ".");
+                if (guess.equalsIgnoreCase(computerColor)) {
+                    correct = correct + 1;
+                }
+            }
+
+            playedAtLeastOnce = true;
+            lastCorrect = correct;
+
+            System.out.println();
+            System.out.println("Game Over");
+            System.out.println("You guessed " + correct + " out of 3 colors correctly.");
+
+            System.out.print("Would you like to continue a Game? Type Yes/No: ");
+            keepPlaying = input.next();
+        }
+
+        // ---- after loop: collect user info and print/write final block ----
+        if (playedAtLeastOnce) {
+            input.nextLine(); // clear buffer
+
+            System.out.print("\nEnter your name: ");
+            String userName = input.nextLine();
+
+            System.out.print("Describe yourself: ");
+            String userDescription = input.nextLine();
+
+            System.out.print("Due Date (MM/DD/YY): ");
+            String dueDate = input.nextLine();
+
+            System.out.println();
+            System.out.println("Game Over");
+            System.out.println("You guessed " + lastCorrect + " out of 3 colors correctly.");
+            System.out.println("Due Date: " + dueDate);
+            System.out.println("Username: " + userName);
+            System.out.println("User Description: " + userDescription);
+            System.out.println("Date: " + dueDate);
+
+            try {
+                java.io.PrintWriter out = new java.io.PrintWriter("EspGameResults.txt");
+                out.println("Game Over");
+                out.println("You guessed " + lastCorrect + " out of 3 colors correctly.");
+                out.println("Due Date: " + dueDate);
+                out.println("Username: " + userName);
+                out.println("User Description: " + userDescription);
+                out.println("Date: " + dueDate);
+                out.close();
+                System.out.println("(Saved to EspGameResults.txt)");
+            } catch (Exception e) {
+                System.out.println("Could not write results file (WIP).");
+            }
+        } else {
+            System.out.println("\nNo games played. Goodbye.");
+        }
+
+        input.close();
+    }
+}
